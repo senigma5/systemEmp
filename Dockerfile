@@ -1,11 +1,11 @@
-# Use an official PHP image with Apache
+# Use PHP 8.2 with Apache
 FROM php:8.2-apache
 
-# Install necessary PHP extensions
-RUN docker-php-ext-install pdo pdo_mysql mysqli
+# Install required extensions for MySQL
+RUN docker-php-ext-install mysqli pdo pdo_mysql
 
-# Copy your project files to the web directory
+# Copy all files to the web directory
 COPY . /var/www/html/
 
-# Expose port 80 for web traffic
+# Expose port 80
 EXPOSE 80
