@@ -1,13 +1,15 @@
 <?php
-$servername = "mysql.railway.internal";
+$servername = "shinkansen.proxy.rlwy.net";
 $username = "root";
 $password = "NkVODZTTcBvPqlhsyiEOYiZsIhiWqBBq";
-$dbname = "railway";
-$port = 3306;
+$database = "railway";
+$port = 53658;
 
-$conn = new mysqli($servername, $username, $password, $dbname, $port);
+$conn = new mysqli($servername, $username, $password, $database, $port);
 
 if ($conn->connect_error) {
-    die("❌ Connection failed: " . $conn->connect_error);
+    die("Connection failed: " . $conn->connect_error);
+} else {
+    echo "✅ Database connection successful!";
 }
 ?>
