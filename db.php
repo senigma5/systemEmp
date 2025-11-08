@@ -1,12 +1,13 @@
 <?php
-$servername = "localhost";
-$username = "root"; // default XAMPP user
-$password = ""; // leave empty
-$dbname = "admin_db"; // your database name
+$servername = "mysql.railway.internal";
+$username = "root";
+$password = "NkVODZTTcBvPqlhsyiEOYiZsIhiWqBBq";
+$dbname = "railway";
+$port = 3306;
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn = new mysqli($servername, $username, $password, $dbname, $port);
 
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    die("❌ Connection failed: " . $conn->connect_error);
 }
 ?>
