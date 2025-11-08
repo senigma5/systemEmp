@@ -1,0 +1,7 @@
+{
+  "name": "systememp/app",
+  "description": "Employee management system deployed on Railway",
+  "require": {
+    "php": ">=8.0"
+  }
+}
