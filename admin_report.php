@@ -1,9 +1,6 @@
 <?php
-// Database connection
-$conn = new mysqli("localhost", "root", "", "admin_db");
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+// Include the shared database connection file
+include('db.php');
 
 // Handle search
 $search = isset($_GET['search']) ? $_GET['search'] : '';
