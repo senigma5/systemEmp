@@ -1,8 +1,10 @@
 <?php
-// Database connection
-$conn = new mysqli("localhost", "root", "", "admin_db");
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+session_start();
+include('db.php'); // ✅ Use your working DB connection (with Railway credentials)
+
+// Check connection
+if (!$conn) {
+    die("Database connection failed: " . mysqli_connect_error());
 }
 
 // Handle search and filters
@@ -13,13 +15,16 @@ $role = isset($_GET['role']) ? $_GET['role'] : '';
 $query = "SELECT * FROM employees WHERE 1=1";
 
 if (!empty($search)) {
-    $query .= " AND (name LIKE '%$search%' OR email LIKE '%$search%' OR position LIKE '%$search%')";
+    $safeSearch = $conn->real_escape_string($search);
+    $query .= " AND (name LIKE '%$safeSearch%' OR email LIKE '%$safeSearch%' OR position LIKE '%$safeSearch%')";
 }
 if (!empty($department)) {
-    $query .= " AND department = '$department'";
+    $safeDept = $conn->real_escape_string($department);
+    $query .= " AND department = '$safeDept'";
 }
 if (!empty($role)) {
-    $query .= " AND role = '$role'";
+    $safeRole = $conn->real_escape_string($role);
+    $query .= " AND role = '$safeRole'";
 }
 
 $query .= " ORDER BY id ASC";
@@ -118,13 +123,15 @@ $roles = $conn->query("SELECT DISTINCT role FROM employees WHERE role IS NOT NUL
     <h2>Employee Report</h2>
 
     <form method="GET" class="filters">
-      <input type="text" name="search" placeholder="Search by name, email or position" value="<?php echo htmlspecialchars($search); ?>">
+      <input type="text" name="search" placeholder="Search by name, email or position" 
+             value="<?php echo htmlspecialchars($search); ?>">
 
       <select name="department">
         <option value="">All Departments</option>
         <?php while ($d = $departments->fetch_assoc()) { ?>
-          <option value="<?php echo $d['department']; ?>" <?php if ($department == $d['department']) echo 'selected'; ?>>
-            <?php echo $d['department']; ?>
+          <option value="<?php echo htmlspecialchars($d['department']); ?>" 
+            <?php if ($department == $d['department']) echo 'selected'; ?>>
+            <?php echo htmlspecialchars($d['department']); ?>
           </option>
         <?php } ?>
       </select>
@@ -132,8 +139,9 @@ $roles = $conn->query("SELECT DISTINCT role FROM employees WHERE role IS NOT NUL
       <select name="role">
         <option value="">All Roles</option>
         <?php while ($r = $roles->fetch_assoc()) { ?>
-          <option value="<?php echo $r['role']; ?>" <?php if ($role == $r['role']) echo 'selected'; ?>>
-            <?php echo $r['role']; ?>
+          <option value="<?php echo htmlspecialchars($r['role']); ?>" 
+            <?php if ($role == $r['role']) echo 'selected'; ?>>
+            <?php echo htmlspecialchars($r['role']); ?>
           </option>
         <?php } ?>
       </select>
@@ -157,29 +165,28 @@ $roles = $conn->query("SELECT DISTINCT role FROM employees WHERE role IS NOT NUL
         <th>Progress</th>
       </tr>
       <?php
-      if ($result->num_rows > 0) {
+      if ($result && $result->num_rows > 0) {
           while ($row = $result->fetch_assoc()) {
               echo "<tr>
-                      <td>{$row['id']}</td>
-                      <td>{$row['name']}</td>
-                      <td>{$row['email']}</td>
-                      <td>{$row['department']}</td>
-                      <td>{$row['position']}</td>
-                      <td>{$row['role']}</td>
-                      <td>{$row['salary']}</td>
-                      <td>{$row['date_joined']}</td>
-                      <td>{$row['progress']}</td>
+                      <td>" . htmlspecialchars($row['id']) . "</td>
+                      <td>" . htmlspecialchars($row['name']) . "</td>
+                      <td>" . htmlspecialchars($row['email']) . "</td>
+                      <td>" . htmlspecialchars($row['department']) . "</td>
+                      <td>" . htmlspecialchars($row['position']) . "</td>
+                      <td>" . htmlspecialchars($row['role']) . "</td>
+                      <td>" . htmlspecialchars($row['salary']) . "</td>
+                      <td>" . htmlspecialchars($row['date_joined']) . "</td>
+                      <td>" . htmlspecialchars($row['progress']) . "</td>
                     </tr>";
           }
       } else {
           echo "<tr><td colspan='9' style='text-align:center;'>No employees found</td></tr>";
       }
-      $conn->close();
       ?>
     </table>
 
     <div class="footer">
-         <a href="reports_dashboard.php" class="btn btn-secondary back-btn">← Back to Dashboard</a>
+      <a href="reports_dashboard.php" class="btn btn-secondary back-btn">← Back to Dashboard</a>
       © <?php echo date("Y"); ?> Employee Report
     </div>
   </div>
