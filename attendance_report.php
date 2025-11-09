@@ -1,9 +1,6 @@
 <?php
-// Database connection
-$conn = new mysqli("localhost", "root", "", "db.php");
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+// ✅ Include database connection
+include('db.php'); // Ensure db.php contains your $conn = new mysqli(...);
 
 // Handle filters
 $employee = isset($_GET['employee']) ? $_GET['employee'] : '';
@@ -11,27 +8,31 @@ $status = isset($_GET['status']) ? $_GET['status'] : '';
 $from_date = isset($_GET['from_date']) ? $_GET['from_date'] : '';
 $to_date = isset($_GET['to_date']) ? $_GET['to_date'] : '';
 
-// Base query
+// ✅ Base query
 $query = "SELECT attendance.*, employees.name 
           FROM attendance 
           INNER JOIN employees ON attendance.employee_id = employees.id 
           WHERE 1=1";
 
-// Apply filters
+// ✅ Apply filters safely
 if (!empty($employee)) {
+    $employee = $conn->real_escape_string($employee);
     $query .= " AND employees.name LIKE '%$employee%'";
 }
 if (!empty($status)) {
+    $status = $conn->real_escape_string($status);
     $query .= " AND attendance.status = '$status'";
 }
 if (!empty($from_date) && !empty($to_date)) {
+    $from_date = $conn->real_escape_string($from_date);
+    $to_date = $conn->real_escape_string($to_date);
     $query .= " AND attendance.date BETWEEN '$from_date' AND '$to_date'";
 }
 
 $query .= " ORDER BY attendance.date DESC";
 $result = $conn->query($query);
 
-// Fetch employees for dropdown
+// ✅ Fetch employees for dropdown
 $employees = $conn->query("SELECT DISTINCT name FROM employees");
 ?>
 <!DOCTYPE html>
@@ -124,8 +125,8 @@ $employees = $conn->query("SELECT DISTINCT name FROM employees");
       <select name="employee">
         <option value="">All Employees</option>
         <?php while ($e = $employees->fetch_assoc()) { ?>
-          <option value="<?php echo $e['name']; ?>" <?php if ($employee == $e['name']) echo 'selected'; ?>>
-            <?php echo $e['name']; ?>
+          <option value="<?php echo htmlspecialchars($e['name']); ?>" <?php if ($employee == $e['name']) echo 'selected'; ?>>
+            <?php echo htmlspecialchars($e['name']); ?>
           </option>
         <?php } ?>
       </select>
@@ -155,11 +156,11 @@ $employees = $conn->query("SELECT DISTINCT name FROM employees");
         <th>Recorded On</th>
       </tr>
       <?php
-      if ($result->num_rows > 0) {
+      if ($result && $result->num_rows > 0) {
           while ($row = $result->fetch_assoc()) {
               echo "<tr>
                       <td>{$row['id']}</td>
-                      <td>{$row['name']}</td>
+                      <td>" . htmlspecialchars($row['name']) . "</td>
                       <td>{$row['status']}</td>
                       <td>{$row['date']}</td>
                       <td>{$row['created_at']}</td>
