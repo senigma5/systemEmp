@@ -1,22 +1,20 @@
 <?php
-// Database connection
-$conn = new mysqli("localhost", "root", "", "admin_db");
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+// ✅ Use shared DB connection
+include('db.php');
 
-// Handle filters
-$employee = isset($_GET['employee']) ? $_GET['employee'] : '';
-$sender = isset($_GET['sender']) ? $_GET['sender'] : '';
-$from_date = isset($_GET['from_date']) ? $_GET['from_date'] : '';
-$to_date = isset($_GET['to_date']) ? $_GET['to_date'] : '';
+// Handle filters safely
+$employee = isset($_GET['employee']) ? $conn->real_escape_string($_GET['employee']) : '';
+$sender = isset($_GET['sender']) ? $conn->real_escape_string($_GET['sender']) : '';
+$from_date = isset($_GET['from_date']) ? $conn->real_escape_string($_GET['from_date']) : '';
+$to_date = isset($_GET['to_date']) ? $conn->real_escape_string($_GET['to_date']) : '';
 
-// Base query with JOIN to get employee name
+// Base query
 $query = "SELECT notifications.*, employees.name 
           FROM notifications 
           LEFT JOIN employees ON notifications.employee_id = employees.id 
           WHERE 1=1";
 
+// Apply filters
 if (!empty($employee)) {
     $query .= " AND employees.name LIKE '%$employee%'";
 }
@@ -129,8 +127,8 @@ $senders = $conn->query("SELECT DISTINCT sender FROM notifications WHERE sender 
       <select name="employee">
         <option value="">All Employees</option>
         <?php while ($e = $employees->fetch_assoc()) { ?>
-          <option value="<?php echo $e['name']; ?>" <?php if ($employee == $e['name']) echo 'selected'; ?>>
-            <?php echo $e['name']; ?>
+          <option value="<?php echo htmlspecialchars($e['name']); ?>" <?php if ($employee == $e['name']) echo 'selected'; ?>>
+            <?php echo htmlspecialchars($e['name']); ?>
           </option>
         <?php } ?>
       </select>
@@ -138,8 +136,8 @@ $senders = $conn->query("SELECT DISTINCT sender FROM notifications WHERE sender 
       <select name="sender">
         <option value="">All Senders</option>
         <?php while ($s = $senders->fetch_assoc()) { ?>
-          <option value="<?php echo $s['sender']; ?>" <?php if ($sender == $s['sender']) echo 'selected'; ?>>
-            <?php echo $s['sender']; ?>
+          <option value="<?php echo htmlspecialchars($s['sender']); ?>" <?php if ($sender == $s['sender']) echo 'selected'; ?>>
+            <?php echo htmlspecialchars($s['sender']); ?>
           </option>
         <?php } ?>
       </select>
@@ -161,14 +159,14 @@ $senders = $conn->query("SELECT DISTINCT sender FROM notifications WHERE sender 
         <th>Date Sent</th>
       </tr>
       <?php
-      if ($result->num_rows > 0) {
+      if ($result && $result->num_rows > 0) {
           while ($row = $result->fetch_assoc()) {
-              $recipient = !empty($row['name']) ? $row['name'] : 'All Employees';
+              $recipient = !empty($row['name']) ? htmlspecialchars($row['name']) : 'All Employees';
               echo "<tr>
                       <td>{$row['id']}</td>
                       <td>{$recipient}</td>
-                      <td>{$row['sender']}</td>
-                      <td class='message-cell'>{$row['message']}</td>
+                      <td>" . htmlspecialchars($row['sender']) . "</td>
+                      <td class='message-cell'>" . htmlspecialchars($row['message']) . "</td>
                       <td>{$row['created_at']}</td>
                     </tr>";
           }
@@ -180,7 +178,7 @@ $senders = $conn->query("SELECT DISTINCT sender FROM notifications WHERE sender 
     </table>
 
     <div class="footer">
-         <a href="reports_dashboard.php" class="btn btn-secondary back-btn">← Back to Dashboard</a>
+      <a href='reports_dashboard.php' class='btn btn-secondary back-btn'>← Back to Dashboard</a>
       © <?php echo date("Y"); ?> Notification Report
     </div>
   </div>
