@@ -190,11 +190,12 @@ if (isset($_GET['edit'])) {
     <?php while($row = $result->fetch_assoc()): ?>
         <tr>
             <td><?= $row['id']; ?></td>
-            <td><?= htmlspecialchars($row['name']); ?></td>
-            <td><?= htmlspecialchars($row['email']); ?></td>
-            <td><?= htmlspecialchars($row['phone']); ?></td>
-            <td><?= htmlspecialchars($row['department']); ?></td>
-            <td><?= htmlspecialchars($row['position']); ?></td>
+            <td><?= htmlspecialchars($row['name'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+<td><?= htmlspecialchars($row['email'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+<td><?= htmlspecialchars($row['phone'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+<td><?= htmlspecialchars($row['department'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+<td><?= htmlspecialchars($row['position'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+
             <td><?= $row['salary']; ?></td>
             <td>
                 <a href="?edit=<?= $row['id']; ?>" style="color:yellow;">Edit</a> |
