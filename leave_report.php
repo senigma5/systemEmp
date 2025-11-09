@@ -1,41 +1,39 @@
 <?php
-// Database connection
-$conn = new mysqli("localhost", "root", "", "admin_db");
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+// ✅ Include database connection file
+include('db.php');
 
-// Get filters
-$employee = isset($_GET['employee']) ? $_GET['employee'] : '';
+// ✅ Get filters
+$employee   = isset($_GET['employee']) ? $_GET['employee'] : '';
 $leave_type = isset($_GET['leave_type']) ? $_GET['leave_type'] : '';
-$status = isset($_GET['status']) ? $_GET['status'] : '';
-$from_date = isset($_GET['from_date']) ? $_GET['from_date'] : '';
-$to_date = isset($_GET['to_date']) ? $_GET['to_date'] : '';
+$status     = isset($_GET['status']) ? $_GET['status'] : '';
+$from_date  = isset($_GET['from_date']) ? $_GET['from_date'] : '';
+$to_date    = isset($_GET['to_date']) ? $_GET['to_date'] : '';
 
-// Base query with join
+// ✅ Base query with join
 $query = "SELECT leave_records.*, employees.name 
           FROM leave_records 
           INNER JOIN employees ON leave_records.employee_id = employees.id 
           WHERE 1=1";
 
-// Apply filters
+// ✅ Apply filters
 if (!empty($employee)) {
-    $query .= " AND employees.name LIKE '%$employee%'";
+    $query .= " AND employees.name LIKE '%" . $conn->real_escape_string($employee) . "%'";
 }
 if (!empty($leave_type)) {
-    $query .= " AND leave_records.leave_type = '$leave_type'";
+    $query .= " AND leave_records.leave_type = '" . $conn->real_escape_string($leave_type) . "'";
 }
 if (!empty($status)) {
-    $query .= " AND leave_records.status = '$status'";
+    $query .= " AND leave_records.status = '" . $conn->real_escape_string($status) . "'";
 }
 if (!empty($from_date) && !empty($to_date)) {
-    $query .= " AND leave_records.from_date BETWEEN '$from_date' AND '$to_date'";
+    $query .= " AND leave_records.from_date BETWEEN '" . $conn->real_escape_string($from_date) . "' 
+                AND '" . $conn->real_escape_string($to_date) . "'";
 }
 
 $query .= " ORDER BY leave_records.from_date DESC";
 $result = $conn->query($query);
 
-// Fetch dynamic options
+// ✅ Fetch dropdown data
 $employees = $conn->query("SELECT DISTINCT name FROM employees");
 $leave_types = $conn->query("SELECT DISTINCT leave_type FROM leave_records");
 ?>
@@ -141,8 +139,8 @@ $leave_types = $conn->query("SELECT DISTINCT leave_type FROM leave_records");
       <select name="employee">
         <option value="">All Employees</option>
         <?php while ($e = $employees->fetch_assoc()) { ?>
-          <option value="<?php echo $e['name']; ?>" <?php if ($employee == $e['name']) echo 'selected'; ?>>
-            <?php echo $e['name']; ?>
+          <option value="<?php echo htmlspecialchars($e['name']); ?>" <?php if ($employee == $e['name']) echo 'selected'; ?>>
+            <?php echo htmlspecialchars($e['name']); ?>
           </option>
         <?php } ?>
       </select>
@@ -150,8 +148,8 @@ $leave_types = $conn->query("SELECT DISTINCT leave_type FROM leave_records");
       <select name="leave_type">
         <option value="">All Leave Types</option>
         <?php while ($l = $leave_types->fetch_assoc()) { ?>
-          <option value="<?php echo $l['leave_type']; ?>" <?php if ($leave_type == $l['leave_type']) echo 'selected'; ?>>
-            <?php echo $l['leave_type']; ?>
+          <option value="<?php echo htmlspecialchars($l['leave_type']); ?>" <?php if ($leave_type == $l['leave_type']) echo 'selected'; ?>>
+            <?php echo htmlspecialchars($l['leave_type']); ?>
           </option>
         <?php } ?>
       </select>
@@ -183,29 +181,31 @@ $leave_types = $conn->query("SELECT DISTINCT leave_type FROM leave_records");
         <th>Status</th>
       </tr>
       <?php
-      if ($result->num_rows > 0) {
+      if ($result && $result->num_rows > 0) {
           while ($row = $result->fetch_assoc()) {
               $status_class = strtolower($row['status']) == 'approved' ? 'status-approved' :
                               (strtolower($row['status']) == 'pending' ? 'status-pending' : 'status-rejected');
               echo "<tr>
                       <td>{$row['id']}</td>
-                      <td>{$row['name']}</td>
-                      <td>{$row['leave_type']}</td>
+                      <td>" . htmlspecialchars($row['name']) . "</td>
+                      <td>" . htmlspecialchars($row['leave_type']) . "</td>
                       <td>{$row['from_date']}</td>
                       <td>{$row['to_date']}</td>
-                      <td>{$row['reason']}</td>
+                      <td>" . htmlspecialchars($row['reason']) . "</td>
                       <td class='$status_class'>{$row['status']}</td>
                     </tr>";
           }
       } else {
           echo "<tr><td colspan='7' style='text-align:center;'>No leave records found</td></tr>";
       }
+
+      // ✅ Close connection
       $conn->close();
       ?>
     </table>
 
     <div class="footer">
-         <a href="reports_dashboard.php" class="btn btn-secondary back-btn">← Back to Dashboard</a>
+      <a href="reports_dashboard.php" class="btn btn-secondary back-btn">← Back to Dashboard</a>
       © <?php echo date("Y"); ?> Leave Report 
     </div>
   </div>
