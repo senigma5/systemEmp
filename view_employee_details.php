@@ -52,20 +52,21 @@ body { background: #f8f9fa; }
         <tbody>
           <?php if ($result && $result->num_rows > 0): ?>
             <?php while ($row = $result->fetch_assoc()): ?>
-              <tr>
-                <td><?= htmlspecialchars($row['id']) ?></td>
-                <td><?= htmlspecialchars($row['name']) ?></td>
-                <td><?= htmlspecialchars($row['email'] ?? '-') ?></td>
-                <td><?= htmlspecialchars($row['phone'] ?? '-') ?></td>
-                <td><?= htmlspecialchars($row['department'] ?? '-') ?></td>
-                <td><?= htmlspecialchars($row['position'] ?? '-') ?></td>
-                <td><?= htmlspecialchars($row['bank_name'] ?? '-') ?></td>
-                <td><?= htmlspecialchars($row['account_number'] ?? '-') ?></td>
-                <td><?= htmlspecialchars($row['address'] ?? '-') ?></td>
-                <td><?= htmlspecialchars($row['salary']) ?></td>
-                <td><?= htmlspecialchars($row['date_joined']) ?></td>
-              </tr>
-            <?php endwhile; ?>
+  <tr>
+    <td><?= htmlspecialchars((string)$row['id']) ?></td>
+    <td><?= htmlspecialchars((string)$row['name']) ?></td>
+    <td><?= htmlspecialchars((string)($row['email'] ?? '-')) ?></td>
+    <td><?= htmlspecialchars((string)($row['phone'] ?? '-')) ?></td>
+    <td><?= htmlspecialchars((string)($row['department'] ?? '-')) ?></td>
+    <td><?= htmlspecialchars((string)($row['position'] ?? '-')) ?></td>
+    <td><?= htmlspecialchars((string)($row['bank_name'] ?? '-')) ?></td>
+    <td><?= htmlspecialchars((string)($row['account_number'] ?? '-')) ?></td>
+    <td><?= htmlspecialchars((string)($row['address'] ?? '-')) ?></td>
+    <td><?= htmlspecialchars((string)$row['salary']) ?></td>
+    <td><?= htmlspecialchars((string)$row['date_joined']) ?></td>
+  </tr>
+<?php endwhile; ?>
+
           <?php else: ?>
             <tr><td colspan="11" class="text-center text-muted">No employee records found.</td></tr>
           <?php endif; ?>
