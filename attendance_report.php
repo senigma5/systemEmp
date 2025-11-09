@@ -1,6 +1,6 @@
 <?php
 // Database connection
-$conn = new mysqli("localhost", "root", "", "admin_db");
+$conn = new mysqli("localhost", "root", "", "db.php");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
