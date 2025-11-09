@@ -146,7 +146,7 @@ body {
     <a href="absentee.php"><i class="bi bi-person-dash"></i> Absentee Tracking</a>
     <a href="admin_send_notification.php"><i class="bi bi-bell"></i> Notifications</a>
     <a href="manage_salary.php"><i class="bi bi-cash-coin"></i> Manage Salaries</a>
-    <a href="send_salary_email.php"><i class="bi bi-envelope"></i> Send Salary Email</a>
+    
   </div>
 
   <div class="mt-auto mb-3 text-center">
