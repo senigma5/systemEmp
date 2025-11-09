@@ -10,18 +10,27 @@ include('db.php');
 // Handle admin attendance saving
 if (isset($_POST['status']) && is_array($_POST['status'])) {
     $today = date('Y-m-d');
+    $allowed_status = ['Present', 'Absent', 'Late', 'Leave']; // Valid ENUM options
 
     foreach ($_POST['status'] as $id => $value) {
+        // Validate status
+        if (!in_array($value, $allowed_status)) {
+            continue; // Skip invalid or empty values
+        }
+
+        // Check if today's attendance already exists
         $check = $conn->prepare("SELECT * FROM attendance WHERE employee_id = ? AND date = ?");
         $check->bind_param("is", $id, $today);
         $check->execute();
         $result = $check->get_result();
 
         if ($result->num_rows > 0) {
+            // Update existing record
             $update = $conn->prepare("UPDATE attendance SET status = ? WHERE employee_id = ? AND date = ?");
             $update->bind_param("sis", $value, $id, $today);
             $update->execute();
         } else {
+            // Insert new record
             $insert = $conn->prepare("INSERT INTO attendance (employee_id, status, date) VALUES (?, ?, ?)");
             $insert->bind_param("iss", $id, $value, $today);
             $insert->execute();
@@ -91,6 +100,7 @@ while($emp = $employees->fetch_assoc()):
         <option value="">Select</option>
         <option value="Present">Present</option>
         <option value="Absent">Absent</option>
+        <option value="Late">Late</option>
         <option value="Leave">Leave</option>
     </select>
 <?php endif; ?>
@@ -108,7 +118,7 @@ while($emp = $employees->fetch_assoc()):
 </table>
 
 <div class="text-center">
-  <button type="submit" class="btn btn-success px-4"> Save Attendance</button>
+  <button type="submit" class="btn btn-success px-4">Save Attendance</button>
 </div>
 </form>
 
